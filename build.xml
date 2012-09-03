@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="animations" default="build" basedir=".">
+
+	<!-- Arguments to gwtc and devmode targets -->
+	<property name="gwt.args" value="-optimize 9 -localWorkers 2"/>
+
+	<property name="gwt.devmode.args" value=""/>
+
+	<!-- Configure path to GWT SDK -->
+	<property name="gwt.sdk" location="../gwt"/>
+
+	<!-- Configure path to build dir -->
+	<property name="build" location="build"/>
+
+	<!-- Configure path to release dir -->
+	<property name="release" location="release"/>
+
+	<path id="project.class.path">
+		<pathelement location="${build}/classes"/>
+		<pathelement location="${release}"/>
+		<pathelement location="${gwt.sdk}/gwt-user.jar"/>
+		<fileset dir="${gwt.sdk}" includes="gwt-dev*.jar"/>
+		<!-- Add any additional non-server libs (such as JUnit) -->
+		<fileset dir="lib" includes="*.jar"/>
+		<fileset dir="lib" includes="**/*.jar"/>
+	</path>
+
+	<target name="javac" description="Compile java source to bytecode">
+		<mkdir dir="${build}/classes"/>
+		<mkdir dir="${release}"/>
+		<javac srcdir="src" includes="**" encoding="utf-8" includeantruntime="false"
+			destdir="${build}/classes"
+			source="1.6" target="1.6" nowarn="true"
+			debug="true" debuglevel="lines,vars,source">
+			<classpath refid="project.class.path"/>
+		</javac>
+		<copy todir="${build}/classes">
+			<fileset dir="src" excludes="**/*.java"/>
+		</copy>
+	</target>
+
+	<target name="gwtc" depends="javac" description="GWT compile to JavaScript (production mode)">
+		<java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
+			<classpath>
+				<pathelement location="src"/>
+				<path refid="project.class.path"/>
+			</classpath>
+			<!-- add jvmarg -Xss16M or similar if you see a StackOverflowError -->
+			<jvmarg value="-Xmx256M"/>
+			<arg line="-war"/>
+			<arg value="${release}"/>
+		</java>
+	</target>
+
+	<macrodef name="gwtc-module">
+		<attribute name="module"/>
+		<attribute name="style" default="OBF"/>
+		<sequential>
+			<mkdir dir="${build}/gen"/>
+			<mkdir dir="${build}/deploy"/>
+			<java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
+				<classpath>
+					<pathelement location="src"/>
+					<path refid="project.class.path"/>
+				</classpath>
+				<jvmarg value="-Xmx256M"/>
+				<arg line="-war"/>
+				<arg value="${release}"/>
+		<arg line="-style"/>
+		<arg value="@{style}"/>
+		<arg line="-deploy"/>
+		<arg value="${build}/deploy"/>
+		<arg line="${gwt.args}"/>
+		<arg value="@{module}"/>
+	</java>
+</sequential>
+  </macrodef>
+
+  <macrodef name="gwt-devmode">
+	  <attribute name="module"/>
+	  <sequential>
+		  <property name="bind" value="127.0.0.1"/>
+		  <java failonerror="true" fork="true" classname="com.google.gwt.dev.DevMode">
+			  <classpath>
+				  <pathelement location="src"/>
+				  <path refid="project.class.path"/>
+			  </classpath>
+			  <jvmarg value="-Xmx256M"/>
+			  <arg line="${gwt.devmode.args}"/>
+			  <arg value="-startupUrl"/>
+			  <arg value="ocean.html"/>
+			  <arg value="-war"/>
+			  <arg value="${release}"/>
+			  <arg value="-deploy"/>
+			  <arg value="${build}/deploy"/>
+			  <arg value="-bindAddress"/>
+			  <arg value="${bind}"/>
+			  <arg value="@{module}"/>
+		  </java>
+	  </sequential>
+  </macrodef>
+
+  <target name="devmode-GL" depends="javac" description="Run development mode">
+	  <gwt-devmode module="com.eleven.GL_hl"/>
+  </target>
+
+  <target name="gwtc-pretty-GL" depends="javac" description="GWT compile to JavaScript (production mode)">
+	  <gwtc-module module="com.eleven.GL_hl" style="PRETTY"/>
+  </target>
+
+  <target name="gwtc-GL" depends="javac" description="GWT compile to JavaScript (production mode)">
+	  <gwtc-module module="com.eleven.GL_hl" style="OBF"/>
+  </target>
+
+  <target name="build" depends="gwtc" description="Build this project"/>
+
+  <target name="clean" description="Cleans this project">
+	  <delete dir="${build}/classes" failonerror="false"/>
+	  <delete dir="${build}/deploy" failonerror="false"/>
+	  <delete dir="${build}/gen" failonerror="false"/>
+	  <delete dir="${release}/ocean" failonerror="false"/>
+  </target>
+
+</project>

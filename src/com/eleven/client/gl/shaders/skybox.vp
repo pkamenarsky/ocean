@@ -1,0 +1,18 @@
+attribute vec4 rm_Vertex;
+
+
+uniform mat4 matWorldView;
+uniform mat4 matProjection;
+uniform vec3 vViewPosition;
+
+
+varying vec3 vTexCoord;
+
+
+void main(void)
+{
+   vec4 newPos = vec4(rm_Vertex.xyz * 10.0 + vViewPosition.xyz, 1.0) - vec4(0.0, 0.0, 0.25, 0.0);
+  
+   gl_Position = matProjection * matWorldView * newPos;
+   vTexCoord = rm_Vertex.xyz;
+}

@@ -1,0 +1,60 @@
+attribute vec4 rm_Vertex;
+attribute vec3 rm_Normal;
+
+
+uniform mat4 matWorldView;
+uniform mat4 matProjection;
+uniform float fElapsedTime;
+
+uniform vec3 vViewPosition;
+uniform vec3 uLightPosition;
+
+
+varying vec3 vNormal;
+varying vec3 vView;
+
+varying vec2 vTexCoord1;
+varying vec2 vTexCoord2;
+varying vec2 vTexCoord3;
+
+varying vec3 vPosition;
+varying vec3 vLight;
+varying vec2 vRefractionOffset;
+
+
+const vec3 scale = vec3(0.01001, 0.01001, 0.01001);
+const vec3 waterSpeed1 = vec3(0.3, 0.0, 0.0);
+const vec3 waterSpeed2 = vec3(-0.1, 0.2, 0.0);
+const vec3 waterSpeed3 = vec3(0.2, 0.1, 0.0);
+
+
+vec3 reflect(vec3 l, vec3 n) {
+	return 2.0 * dot(l, n) * n - l;
+}
+
+vec3 refract(vec3 l, vec3 n, float index) {
+	float dot = dot(l, n);
+	float a = sqrt(1.0 - index * index * (1.0 - dot * dot));
+	
+	return (index * dot - a) * n - index * l;
+}
+
+void main(void) {
+	vec4 v = rm_Vertex;
+
+//	v.xy *= 500.0;
+	v.z = 4.0;
+	
+	vTexCoord1 = (v.xyz * scale * 5.0 + fElapsedTime * 0.2 * waterSpeed1).xy;
+	vTexCoord2 = (v.xyz * scale * 6.0 + fElapsedTime * 0.2 * waterSpeed2).xy;
+	vTexCoord3 = (v.xyz * scale * 4.0 + fElapsedTime * 0.2 * waterSpeed3).xy;
+	
+	vPosition = v.xyz;
+	
+	vNormal = vec3(0.0, 0.0, 1.0);
+	vView = v.xyz - vViewPosition.xyz;
+	vLight = v.xyz - uLightPosition.xyz; 
+
+	vec4 worldPos = matWorldView * v;
+	gl_Position = matProjection * worldPos;
+}

@@ -1,0 +1,121 @@
+uniform mat4 uModelViewMatrix, uProjectionMatrix;
+uniform mat3 uNormalMatrix;
+uniform vec3 uLightPosition;
+uniform vec3 uEyePosition;
+
+attribute vec4 aPosition;
+attribute vec3 aNormal;
+attribute vec2 aTexCoord;
+
+varying vec2 vBump;
+
+varying vec3 vNormal, vLightDir;
+varying vec3 vwNormal;
+varying vec3 vView;
+varying vec3 vReflection;
+varying vec2 vRefractionOffset;
+
+const float pi = 3.14159;
+uniform float waterHeight;
+uniform float time;
+//uniform int numWaves;
+uniform float amplitude[8];
+uniform float wavelength[8];
+uniform float speed[8];
+uniform vec2 direction[8];
+
+float wave(int i, float x, float y) {
+	float frequency = 2.0 * pi / wavelength[i];
+	float phase = speed[i] * frequency;
+	float theta = dot(direction[i], vec2(x, y));
+
+	return amplitude[i] * sin(theta * frequency + time * phase) * waterHeight;
+//	return 0.0;
+}
+
+float waveHeight(float x, float y) {
+	float height = 0.0;
+	
+//	for (int i = 0; i < 1; i++)
+	height += wave(0, x, y);
+	height += wave(1, x, y);
+	height += wave(2, x, y);
+	height += wave(3, x, y);
+	
+	return height;
+}
+
+float dWavedx(int i, float x, float y) {
+    float frequency = 2.0 * pi / wavelength[i];
+    float phase = speed[i] * frequency;
+    float theta = dot(direction[i], vec2(x, y));
+    float A = amplitude[i] * direction[i].x * frequency;
+    
+    return A * cos(theta * frequency + time * phase) * waterHeight;
+}
+
+float dWavedy(int i, float x, float y) {
+    float frequency = 2.0 * pi / wavelength[i];
+    float phase = speed[i] * frequency;
+    float theta = dot(direction[i], vec2(x, y));
+    float A = amplitude[i] * direction[i].y * frequency;
+    
+    return A * cos(theta * frequency + time * phase) * waterHeight;
+}
+
+vec3 waveNormal(float x, float y) {
+    float dx = 0.0;
+    float dy = 0.0;
+//    for (int i = 0; i < numWaves; ++i) {
+
+	dx += dWavedx(0, x, y);
+	dy += dWavedy(0, x, y);
+	
+	dx += dWavedx(1, x, y);
+	dy += dWavedy(1, x, y);
+	
+	dx += dWavedx(2, x, y);
+	dy += dWavedy(2, x, y);
+	
+	dx += dWavedx(3, x, y);
+	dy += dWavedy(3, x, y);
+	
+//    }
+    vec3 n = vec3(-dx, waterHeight, -dy);
+    return normalize(n);
+}
+
+vec3 reflect(vec3 l, vec3 n) {
+	return 2.0 * dot(l, n) * n - l;
+}
+
+vec3 refract(vec3 l, vec3 n, float index) {
+	float dot = dot(l, n);
+	float a = sqrt(1.0 - index * index * (1.0 - dot * dot));
+	
+	return (index * dot - a) * n - index * l;
+}
+
+void main() {
+	vBump.xy = aTexCoord.xy;
+
+	vec4 v = vec4(aPosition);
+	v.y = waveHeight(aTexCoord.x, aTexCoord.y);
+	
+	vec4 worldPos = uModelViewMatrix * v;
+
+	gl_Position = uProjectionMatrix * worldPos;
+	
+	vec3 normal = waveNormal(aTexCoord.x, aTexCoord.y);
+//	vec3 normal = vec3(0.0, 1.0, 0.0);
+	vwNormal = normal;
+	
+	vNormal = uNormalMatrix * normal;
+	vLightDir = uLightPosition - worldPos.xyz;
+
+	vView = normalize(v.xyz - uEyePosition.xyz); 
+    vReflection = reflect(vView, normal);
+    
+    vec3 rf = normalize(refract(vView, normal, 1.333));
+    vRefractionOffset = vec2((v.x + rf.x * 1.0) * 1.0, (v.z + rf.z * 1.0) * 1.0);
+}
