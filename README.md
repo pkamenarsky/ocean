@@ -10,7 +10,7 @@ You can rotate the view by pressing either `A` or `D`.
 
 Check out a complete functioning live demo [here](http://pkamenarsky.github.com/ocean/ocean.html).
 
-*Note:* Firefox seems to have problems loading the textures when the page is opened by clicking the link with the middle mouse button. When that happens, either reload the page or just copy the link and paste it into a fresh tab.
+*Note:* Browsers seems to have problems loading the textures when the page is opened by clicking the link with the middle mouse button. When that happens, either reload the page or just copy the link and paste it into a fresh tab.
 
 ## Building
 
