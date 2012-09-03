@@ -115,9 +115,7 @@
   <target name="build" depends="gwtc" description="Build this project"/>
 
   <target name="clean" description="Cleans this project">
-	  <delete dir="${build}/classes" failonerror="false"/>
-	  <delete dir="${build}/deploy" failonerror="false"/>
-	  <delete dir="${build}/gen" failonerror="false"/>
+	  <delete dir="${build}" failonerror="false"/>
 	  <delete dir="${release}/ocean" failonerror="false"/>
   </target>
 
