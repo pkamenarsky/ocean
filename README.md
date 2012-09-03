@@ -6,7 +6,7 @@ This is a small WebGL demo showcasing procedural waves with fresnel reflections,
 
 ## Live Demo
 
-Check out a complete functioning live demo [here](http://pkamenarsky.github.com/ocean/ocean.html).
+Check out a complete functioning live demo [here](http://pkamenarsky.github.com/ocean/ocean.html). Note: Firefox seems to have problems loading the textures when the page is opened by clicking the link with the middle mouse button. So either copy the link and paste it into a fresh tab or just click the link using the left mouse button.
 
 ## Building
 
