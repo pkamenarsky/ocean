@@ -35,6 +35,17 @@ vec3 saturate(vec3 v) {
 	return vec3(clamp(v.x, 0.0, 1.0), clamp(v.y, 0.0, 1.0), clamp(v.z, 0.0, 1.0));
 }
 
+vec3 reflect_own(vec3 l, vec3 n) {
+	return 2.0 * dot(l, n) * n - l;
+}
+
+vec3 refract_own(vec3 l, vec3 n, float index) {
+	float dot = dot(l, n);
+	float a = sqrt(1.0 - index * index * (1.0 - dot * dot));
+	
+	return (index * dot - a) * n - index * l;
+}
+
 void main(void)
 {
 	vec3 wave1 = texture2D(uWaterbump, vTexCoord1).rgb;
@@ -49,8 +60,8 @@ void main(void)
 	
 	float fresnel = pow(1.0 - dot(-view, normal), fresnelPow);
 
-	vec3 reflectVec = reflect(-view, normal);
-    vec3 refractVec = normalize(refract(view, normal, 0.77));
+	vec3 reflectVec = reflect_own(-view, normal);
+    vec3 refractVec = normalize(refract_own(view, normal, 0.77));
     
 	vec2 refractTex = vec2((vPosition.x * scale.x + refractVec.x * waterDepth) * 1.0, (vPosition.y * scale.x + refractVec.y * waterDepth) * 1.0);
 	vec3 cubeTex = vec3(-reflectVec.x, -reflectVec.y, -reflectVec.z);
@@ -58,7 +69,7 @@ void main(void)
 	vec3 reflectColor = textureCube(uSky, cubeTex).xyz;
 	vec3 refractColor = texture2D(uSand, refractTex).xyz + texture2D(uCaustics, refractTex * causticsScale).xyz + tintColor; // * clamp((factor / 20.0), 1.0, 1.0);
 
-//	vec3 specular = pow(saturate(dot(-view, reflect(normalize(vLight), normal))), 64.0) * 0.4;
+//	vec3 specular = pow(saturate(dot(-view, reflect_own(normalize(vLight), normal))), 64.0) * 0.4;
 	vec3 specular = vec3(0.0, 0.0, 0.0);
 
 //	fresnel = 0.0;

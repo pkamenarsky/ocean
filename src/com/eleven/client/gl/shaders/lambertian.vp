@@ -85,11 +85,11 @@ vec3 waveNormal(float x, float y) {
     return normalize(n);
 }
 
-vec3 reflect(vec3 l, vec3 n) {
+vec3 reflect_own(vec3 l, vec3 n) {
 	return 2.0 * dot(l, n) * n - l;
 }
 
-vec3 refract(vec3 l, vec3 n, float index) {
+vec3 refract_own(vec3 l, vec3 n, float index) {
 	float dot = dot(l, n);
 	float a = sqrt(1.0 - index * index * (1.0 - dot * dot));
 	
@@ -114,8 +114,8 @@ void main() {
 	vLightDir = uLightPosition - worldPos.xyz;
 
 	vView = normalize(v.xyz - uEyePosition.xyz); 
-    vReflection = reflect(vView, normal);
+    vReflection = reflect_own(vView, normal);
     
-    vec3 rf = normalize(refract(vView, normal, 1.333));
+    vec3 rf = normalize(refract_own(vView, normal, 1.333));
     vRefractionOffset = vec2((v.x + rf.x * 1.0) * 1.0, (v.z + rf.z * 1.0) * 1.0);
 }

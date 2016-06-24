@@ -22,9 +22,9 @@ void main() {
 
 	vec3 bump = normalize(texture2D(uWaterbump, vBump / 5.0).xzy);
 		
-//	vec3 reflect = textureCube(uCubemap, (vReflection + bump) / 2.0).xyz;
-	vec3 reflect = textureCube(uCubemap, vReflection).xyz;
-	vec3 refract = texture2D(uSand, vRefractionOffset).xyz; // * vec3(170.0 / 255.0, 250.0 / 255.0, 178.0 / 255.0);
+//	vec3 rfl = textureCube(uCubemap, (vReflection + bump) / 2.0).xyz;
+	vec3 rfl = textureCube(uCubemap, vReflection).xyz;
+	vec3 rfr = texture2D(uSand, vRefractionOffset).xyz; // * vec3(170.0 / 255.0, 250.0 / 255.0, 178.0 / 255.0);
 	
 	float dot = dot(normalize(vwNormal), normalize(-vView));
 	float fresnel = pow(1.0 - dot, 5.0);
@@ -35,5 +35,5 @@ void main() {
 //		gl_FragColor = vec4(r * 0.3 + c * 0.7, 1.0);
 
 //	gl_FragColor = vec4(c * 0.6 + r * 0.4, 1.0);
-	gl_FragColor = vec4(refract * (1.0 - fresnel) + reflect * fresnel, 1.0);
+	gl_FragColor = vec4(rfr * (1.0 - fresnel) + rfl * fresnel, 1.0);
 }

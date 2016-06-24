@@ -302,6 +302,7 @@ public class GL_hl implements EntryPoint {
 				gl.bindTexture(TextureTarget.TEXTURE_2D, texture);
 				gl.generateMipmap(TextureTarget.TEXTURE_2D);
 				
+				shader.bind();
 				shader.setNamedTexture(unit, name);
 			}
 			
